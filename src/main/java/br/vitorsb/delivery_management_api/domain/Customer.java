@@ -20,6 +20,7 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
+    @Column(name = "customer_id")
     private Long customerId;
 
     @Column(name = "name", nullable = false)

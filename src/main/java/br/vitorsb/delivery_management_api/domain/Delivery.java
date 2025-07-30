@@ -21,6 +21,7 @@ public class Delivery {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
+    @Column(name = "delivery_id")
     private Long deliveryId;
 
     @Column(name = "package_quantity", nullable = false)
