@@ -1,7 +1,5 @@
 package br.vitorsb.delivery_management_api.domain.dto.request;
 
-import br.vitorsb.delivery_management_api.domain.dto.AddressDTO;
-import br.vitorsb.delivery_management_api.domain.dto.CustomerDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,9 +15,9 @@ public record DeliveryRequest(
 
         @Valid
         @NotNull(message = "Customer is required")
-        CustomerDTO customer,
+        CustomerRequest customer,
 
         @Valid
         @NotNull(message = "Address Delivery is required")
-        AddressDTO addressDelivery) {
+        AddressRequest addressDelivery) {
 }

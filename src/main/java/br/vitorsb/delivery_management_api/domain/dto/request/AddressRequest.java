@@ -1,8 +1,8 @@
-package br.vitorsb.delivery_management_api.domain.dto;
+package br.vitorsb.delivery_management_api.domain.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record AddressDTO(
+public record AddressRequest(
 
         @NotBlank(message = "CEP is required")
         String cep,

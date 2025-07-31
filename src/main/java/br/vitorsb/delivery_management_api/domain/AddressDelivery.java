@@ -18,7 +18,7 @@ public class AddressDelivery {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     @Column(name = "address_id")
-    private Long addressId;
+    private Long addressDeliveryId;
 
     @Column(name = "cep", nullable = false)
     private String cep;

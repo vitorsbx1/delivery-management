@@ -9,11 +9,11 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString
+@ToString(exclude = "addressDeliveries")
+@Builder
 @Table(name = "customer")
 public class Customer {
 
@@ -29,6 +29,7 @@ public class Customer {
     @Column(name = "cpf", nullable = false)
     private String cpf;
 
+    @Builder.Default
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AddressDelivery> addressDeliveries = new ArrayList<>();
 }

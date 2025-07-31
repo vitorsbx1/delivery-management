@@ -34,11 +34,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body("Data integrity violation: " + e.getMessage());
     }
 
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFound(CustomerNotFoundException e) {
+        logger.warn("Resource not found: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(AddressDeliveryNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFound(AddressDeliveryNotFoundException e) {
+        logger.warn("Resource not found: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
     @ExceptionHandler(DeliveryNotFoundException.class)
     public ResponseEntity<String> handleResourceNotFound(DeliveryNotFoundException e) {
         logger.warn("Resource not found: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -50,5 +63,4 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(errors);
     }
-
 }

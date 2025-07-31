@@ -4,7 +4,6 @@ package br.vitorsb.delivery_management_api.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,7 +33,7 @@ public class Delivery {
     @JoinColumn(referencedColumnName = "customer_id", name = "customer_id", nullable = false)
     private Customer customer;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(referencedColumnName = "address_id", name = "address_id", nullable = false)
     private AddressDelivery addressDelivery;
 }
