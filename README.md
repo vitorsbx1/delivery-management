@@ -112,4 +112,141 @@ docker-compose down -v
 > `http://localhost:8080/swagger-ui/index.html`
 
 
+Claro! Aqui está o restante do conteúdo que você pediu, formatado corretamente em Markdown:
 
+Markdown
+
+### Rodando localmente com H2 (apenas para testes ou desenvolvimento local sem Docker)
+
+Caso você não consiga rodar o Docker ou queira testar a aplicação com o banco de dados H2 em memória:
+
+1.  Certifique-se de ter **Java 21** e **Maven** instalados.
+2.  Navegue até a raiz do projeto no seu terminal.
+3.  Execute o comando para compilar e rodar a aplicação, ativando o perfil `h2`:
+
+    ```bash
+    mvn spring-boot:run -Dspring-boot.run.profiles=h2
+    ```
+
+    Neste modo, a aplicação utilizará um banco de dados H2 em memória, que será **limpo a cada reinício** da aplicação.
+
+---
+
+<a name="-como-executar-os-testes"></a>
+## ⚙️ Como Executar os Testes
+
+Os testes são cruciais para garantir a qualidade e robustez da aplicação. Este projeto possui **testes unitários** abrangentes para as camadas de Repository, Service e Controller, utilizando **JUnit 5** e **Mockito**.
+
+Os testes de Repository utilizam um banco de dados H2 em memória para simular a persistência de forma rápida e isolada.
+
+Para executar todos os testes:
+
+```bash
+mvn test
+<a name="-containerizacao-com-docker"></a>
+
+🐳 Containerização com Docker
+A aplicação é totalmente containerizada utilizando Docker e Docker Compose, facilitando o ambiente de desenvolvimento e a implantação.
+
+O arquivo docker-compose.yml define dois serviços:
+
+mysql: Um contêiner com MySQL 8.0 que serve como banco de dados persistente para a aplicação. As credenciais e o nome do banco são configurados através de variáveis de ambiente no docker-compose.yml.
+
+app: Um contêiner que executa a aplicação Spring Boot. Ele é construído a partir do Dockerfile na raiz do projeto, que utiliza uma abordagem multi-stage build para otimizar o tamanho final da imagem:
+
+Fase de Build: Compila o projeto Java usando Maven.
+
+Fase de Run: Cria uma imagem leve contendo apenas o JAR executável e a JRE necessária para rodar a aplicação.
+
+Comandos Docker úteis:
+Para subir os serviços:
+
+Bash
+
+docker-compose up --build
+Para parar os serviços (mantendo os dados do MySQL):
+
+Bash
+
+docker-compose down
+Para parar os serviços e remover os volumes de dados (útil para começar com um banco de dados limpo):
+
+Bash
+
+docker-compose down -v
+<a name="-documentacao-da-api-swagger"></a>
+
+📄 Documentação da API (Swagger)
+A documentação interativa da API é gerada automaticamente pelo Springdoc OpenAPI (Swagger UI). Ela permite que você visualize todos os endpoints disponíveis, seus parâmetros de requisição, modelos de dados (DTOs) e possíveis respostas.
+
+Após iniciar a aplicação (seja via Docker ou localmente), acesse a documentação em:
+
+http://localhost:8080/swagger-ui.html
+<a name="-escolhas-arquiteturais-e-de-design"></a>
+
+💡 Escolhas Arquiteturais e de Design
+Arquitetura em Camadas (MVC): O projeto segue a estrutura tradicional de Controller, Service e Repository, promovendo a separação de preocupações (Separation of Concerns).
+
+Controller: Responsável por lidar com requisições HTTP e retornar respostas. Foca apenas na interação com a web.
+
+Service: Contém a lógica de negócio principal. Orquestra as operações, valida regras de negócio e interage com a camada de repositório.
+
+Repository: Abstrai a camada de persistência de dados, interagindo diretamente com o banco de dados.
+
+Entidades e DTOs (Data Transfer Objects):
+
+Entidades: Representam a estrutura dos dados no banco de dados.
+
+DTOs: Utilizados para entrada (requisições) e saída (respostas) da API, desacoplando o contrato da API da estrutura interna das entidades.
+
+MapStruct: Escolhido para realizar o mapeamento entre Entidades e DTOs. Isso reduz o boilerplate code, evita erros manuais e melhora a performance em comparação com mapeamentos manuais ou reflection.
+
+Tratamento de Exceções: Exceções customizadas (DeliveryNotFoundException, CustomerNotFoundException, AddressDeliveryNotFoundException) foram criadas para cenários específicos. Um GlobalExceptionHandler (@ControllerAdvice) é utilizado para centralizar o tratamento dessas exceções, retornando respostas HTTP consistentes (ex: 404 Not Found, 400 Bad Request) para o cliente da API.
+
+Validação de Dados: Utiliza a especificação Bean Validation (JSR 380) com anotações (@NotNull, @Valid, etc.) nos DTOs de requisição para garantir a integridade dos dados de entrada antes que cheguem à lógica de negócio.
+
+Reutilização de Clientes e Endereços: A lógica findOrCreate nos serviços de Customer e AddressDelivery garante que, se um cliente com o mesmo CPF ou um endereço com o mesmo CEP, número e associado ao mesmo cliente já existirem, eles serão reutilizados em vez de criar novas entradas, evitando duplicidade e mantendo a consistência dos dados.
+
+Controle de Logs: A aplicação utiliza o sistema de logging padrão do Spring Boot (SLF4J/Logback) para registrar eventos importantes, erros e informações de depuração, facilitando o monitoramento e a identificação de problemas.
+
+<a name="-estrutura-de-dados-da-entrega"></a>
+
+📦 Estrutura de Dados da Entrega
+Cada entrega é composta pelos seguintes campos:
+
+ID de Entrega: Identificador único da entrega.
+
+Quantidade de Pacotes: Número de itens ou volumes na entrega.
+
+Data Limite de Entrega: Prazo máximo para a entrega ser concluída.
+
+Cliente:
+
+Nome do Cliente
+
+CPF do Cliente
+
+Endereço de Destino da Entrega:
+
+CEP
+
+UF (Unidade Federativa)
+
+Cidade
+
+Bairro
+
+Rua
+
+Número
+
+Complemento (Opcional)
+
+<a name="-repositorio-e-contato"></a>
+
+🔗 Repositório e Contato
+O código-fonte completo do projeto está disponível no repositório público:
+
+https://github.com/vitorsbx1/delivery-management
+
+Para qualquer dúvida ou contribuição, sinta-se à vontade para entrar em contato.
