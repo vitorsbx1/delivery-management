@@ -9,16 +9,18 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = "addressDeliveries")
+@Builder
 @Table(name = "customer")
 public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
+    @Column(name = "customer_id")
     private Long customerId;
 
     @Column(name = "name", nullable = false)
@@ -27,6 +29,7 @@ public class Customer {
     @Column(name = "cpf", nullable = false)
     private String cpf;
 
+    @Builder.Default
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AddressDelivery> addressDeliveries = new ArrayList<>();
 }

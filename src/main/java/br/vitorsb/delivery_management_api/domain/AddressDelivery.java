@@ -17,7 +17,8 @@ public class AddressDelivery {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    private Long addressId;
+    @Column(name = "address_id")
+    private Long addressDeliveryId;
 
     @Column(name = "cep", nullable = false)
     private String cep;
@@ -39,4 +40,8 @@ public class AddressDelivery {
 
     @Column(name = "complement")
     private String complement;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 }
