@@ -1,4 +1,3 @@
-
 # 📦 Delivery Management API
 
 Sistema **Back-End** desenvolvido em **Java** com **Spring Boot** para gerenciar entregas, clientes e endereços associados via **REST APIs**.
@@ -19,16 +18,16 @@ Sistema **Back-End** desenvolvido em **Java** com **Spring Boot** para gerenciar
 
 ## 📁 Índice
 
-1. [Visão Geral do Projeto](#visão-geral-do-projeto)  
-2. [Funcionalidades](#funcionalidades)  
-3. [Tecnologias Utilizadas](#tecnologias-utilizadas)  
-4. [Como Rodar o Projeto](#como-rodar-o-projeto)  
-5. [Como Executar os Testes](#como-executar-os-testes)  
-6. [Containerização com Docker](#containerização-com-docker)  
-7. [Documentação da API (Swagger)](#documentação-da-api-swagger)  
-8. [Escolhas Arquiteturais e de Design](#escolhas-arquiteturais-e-de-design)  
-9. [Estrutura de Dados da Entrega](#estrutura-de-dados-da-entrega)  
-10. [Repositório e Contato](#repositório-e-contato)  
+1. [Visão Geral do Projeto](#-visão-geral-do-projeto)  
+2. [Funcionalidades](#-funcionalidades)  
+3. [Tecnologias Utilizadas](#-tecnologias-utilizadas)  
+4. [Como Rodar o Projeto](#-como-rodar-o-projeto)  
+5. [Como Executar os Testes](#-como-executar-os-testes)  
+6. [Containerização com Docker](#-containerização-com-docker)  
+7. [Documentação da API (Swagger)](#-documentação-da-api-swagger)  
+8. [Escolhas Arquiteturais e de Design](#-escolhas-arquiteturais-e-de-design)  
+9. [Estrutura de Dados da Entrega](#-estrutura-de-dados-da-entrega)  
+10. [Repositório e Contato](#-repositório-e-contato)  
 
 ---
 
@@ -68,27 +67,50 @@ Projeto que oferece uma **API RESTful** para o **gerenciamento de entregas**, co
 
 ## 🚀 Como Rodar o Projeto
 
-### Pré-requisitos:
-- Docker e Docker Compose instalados.
+### ✅ Opção 1: Rodar Localmente com H2 (sem Docker)
 
-### Passos:
+> Útil para testes rápidos e desenvolvimento local.
+
 ```bash
+# Clonar o projeto
 git clone https://github.com/vitorsbx1/delivery-management
 cd delivery-management
+
+# Executar o projeto com profile "h2" (usa banco em memória)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=h2
+```
+
+> O projeto já utiliza a variável:  
+> `spring.profiles.active=${PROFILE:dbg}`  
+> Isso permite usar `PROFILE=h2` diretamente com Spring Boot.
+
+---
+
+### ✅ Opção 2: Rodar com Docker + MySQL
+
+> Ambiente mais próximo do real com persistência.
+
+```bash
+# Clonar o projeto
+git clone https://github.com/vitorsbx1/delivery-management
+cd delivery-management
+
+# Gerar o .jar
+./mvnw clean package -DskipTests
+
+# Subir containers
 docker-compose up --build
 ```
 
-- A aplicação ficará disponível em: `http://localhost:8080`
-- A documentação Swagger em: `http://localhost:8080/swagger-ui.html`
+- A aplicação estará em: `http://localhost:8080`
+- Documentação Swagger: `http://localhost:8080/swagger-ui.html`
+- MySQL: `localhost:3306`, usuário: `delivery`, senha: `delivery123`
 
-### Ambiente Limpo:
-```bash
-docker-compose down -v
-```
+### Comandos úteis:
 
-### Rodando Localmente com H2:
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=h2
+docker-compose down             # parar mantendo volumes
+docker-compose down -v          # parar e remover volumes
 ```
 
 ---
@@ -96,11 +118,12 @@ mvn spring-boot:run -Dspring-boot.run.profiles=h2
 ## ⚙️ Como Executar os Testes
 
 Execute os testes com:
+
 ```bash
 mvn test
 ```
 
-Inclui testes unitários nas camadas **Repository**, **Service** e **Controller** com **JUnit 5** e **Mockito**.
+> Os testes cobrem as camadas **Repository**, **Service** e **Controller**, usando **JUnit 5** e **Mockito**.
 
 ---
 
@@ -109,14 +132,7 @@ Inclui testes unitários nas camadas **Repository**, **Service** e **Controller*
 A aplicação possui dois serviços definidos no `docker-compose.yml`:
 
 - `mysql`: banco de dados persistente com MySQL 8.0
-- `app`: aplicação Spring Boot com build multi-stage
-
-### Comandos úteis:
-```bash
-docker-compose up --build       # subir os serviços
-docker-compose down             # parar mantendo volumes
-docker-compose down -v          # parar e remover volumes
-```
+- `app`: aplicação Spring Boot empacotada via Dockerfile
 
 ---
 
@@ -133,12 +149,12 @@ http://localhost:8080/swagger-ui.html
 ## 💡 Escolhas Arquiteturais e de Design
 
 - Arquitetura em Camadas: **Controller**, **Service**, **Repository**
-- **Entidades vs DTOs**: separação entre modelo de domínio e dados da API
-- **MapStruct**: mapeamento eficiente entre entidades e DTOs
-- **Tratamento de Exceções**: com `@ControllerAdvice` e exceções customizadas
-- **Validação com Bean Validation**: via anotações nos DTOs
-- **Reutilização de Cliente/Endereço**: lógica `findOrCreate`
-- **Logs**: com SLF4J/Logback
+- Separação entre **Entidades** e **DTOs**
+- **MapStruct**: para mapeamento eficiente entre objetos
+- **Tratamento de Erros** com `@ControllerAdvice`
+- **Validações** com Bean Validation (`@NotNull`, `@CPF`, etc)
+- **Reuso de Cliente/Endereço** com lógica `findOrCreate`
+- **Logs** com SLF4J + Logback
 
 ---
 
