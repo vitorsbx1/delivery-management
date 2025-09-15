@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>br.vitorsb</groupId>
 	<artifactId>delivery-management-api</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>delivery-management-api</name>
 	<description>API for delivery registration</description>
 	<url/>

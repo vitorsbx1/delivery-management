@@ -44,7 +44,7 @@ class DeliveryControllerTest {
 
     @BeforeEach
     void setUp() {
-        CustomerRequest customerRequest = new CustomerRequest("Vitor", "123123124124");
+        CustomerRequest customerRequest = new CustomerRequest("Vitor", "13293199666");
         AddressRequest addressRequest = new AddressRequest("98765432", "RJ", "Rio", "Centro", "AV. Peixoto", "500", null);
 
         deliveryRequest = new DeliveryRequest(
@@ -80,7 +80,7 @@ class DeliveryControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 400 bad reequest")
+    @DisplayName("Should return 400 bad request")
     void shouldReturn400WhenCreatingWithInvalidRequest() throws Exception {
 
         DeliveryRequest invalidRequest = new DeliveryRequest(
