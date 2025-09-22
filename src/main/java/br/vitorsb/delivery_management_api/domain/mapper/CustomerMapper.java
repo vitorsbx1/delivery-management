@@ -3,13 +3,31 @@ package br.vitorsb.delivery_management_api.domain.mapper;
 import br.vitorsb.delivery_management_api.domain.Customer;
 import br.vitorsb.delivery_management_api.domain.dto.request.CustomerRequest;
 import br.vitorsb.delivery_management_api.domain.dto.response.CustomerResponse;
-import org.mapstruct.Mapper;
 
 
-@Mapper(componentModel = "spring")
-public interface CustomerMapper {
+public class CustomerMapper {
 
 
-     CustomerResponse toDTO(Customer customer);
-     Customer toEntity(CustomerRequest customerDTO);
+     public static CustomerResponse toDTO(Customer customer){
+          if (customer == null) {
+               return null;
+          }
+
+          return new CustomerResponse(
+                    customer.getName(),
+                    customer.getCpf()
+          );
+     }
+
+     public static Customer toEntity(CustomerRequest customerDTO){
+          if (customerDTO == null) {
+               return null;
+          }
+
+            return new Customer(null,
+                        customerDTO.name(),
+                        customerDTO.cpf(),
+                        null
+            );
+     }
 }

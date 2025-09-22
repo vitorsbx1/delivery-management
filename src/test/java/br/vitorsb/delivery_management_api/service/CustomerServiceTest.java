@@ -3,6 +3,7 @@ package br.vitorsb.delivery_management_api.service;
 import br.vitorsb.delivery_management_api.config.exception.CustomerNotFoundException;
 import br.vitorsb.delivery_management_api.domain.Customer;
 import br.vitorsb.delivery_management_api.domain.dto.request.CustomerRequest;
+import br.vitorsb.delivery_management_api.domain.dto.response.CustomerResponse;
 import br.vitorsb.delivery_management_api.domain.mapper.CustomerMapper;
 import br.vitorsb.delivery_management_api.repository.CustomerRepository;
 import br.vitorsb.delivery_management_api.service.impl.CustomerServiceImpl;
@@ -26,6 +27,7 @@ class CustomerServiceTest {
 
     @Mock
     private CustomerRepository customerRepository;
+
     @Mock
     private CustomerMapper customerMapper;
 
@@ -34,19 +36,22 @@ class CustomerServiceTest {
 
     private Customer customer;
     private CustomerRequest customerRequest;
+    private CustomerResponse customerResponse;
 
     @BeforeEach
     void setUp() {
         customer = Customer.builder()
                 .customerId(1L)
                 .name("Vitor")
-                .cpf("123124124")
+                .cpf("123.124.124-00")
                 .build();
-        customerRequest = new CustomerRequest("Vitor", "123124124");
+
+        customerRequest = new CustomerRequest("Vitor", "123.124.124-00");
+        customerResponse = new CustomerResponse(customer.getName(), customer.getCpf());
     }
 
     @Test
-    @DisplayName("should find or create customer")
+    @DisplayName("Should find or create customer when exists")
     void shouldFindOrCreateCustomerWhenExists() {
         when(customerRepository.findByCpf(customerRequest.cpf())).thenReturn(Optional.of(customer));
 
@@ -54,31 +59,32 @@ class CustomerServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getCustomerId()).isEqualTo(customer.getCustomerId());
-        verify(customerRepository, times(1)).findByCpf(customerRequest.cpf());
-        verify(customerRepository, never()).save(any(Customer.class));
-        verify(customerMapper, never()).toEntity(any(CustomerRequest.class));
+        assertThat(result.getName()).isEqualTo(customer.getName());
+        assertThat(result.getCpf()).isEqualTo(customer.getCpf());
+
+        verify(customerRepository).findByCpf(customerRequest.cpf());
+        verify(customerRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("should find or create customer when not exists")
+    @DisplayName("Should find or create customer when not exists")
     void shouldFindOrCreateCustomerWhenNotExists() {
         when(customerRepository.findByCpf(customerRequest.cpf())).thenReturn(Optional.empty());
-        when(customerMapper.toEntity(customerRequest)).thenReturn(customer);
-
         when(customerRepository.save(any(Customer.class))).thenReturn(customer);
 
         Customer result = customerService.findOrCreate(customerRequest);
 
         assertThat(result).isNotNull();
-
         assertThat(result.getCustomerId()).isEqualTo(customer.getCustomerId());
-        verify(customerRepository, times(1)).findByCpf(customerRequest.cpf());
-        verify(customerMapper, times(1)).toEntity(customerRequest);
-        verify(customerRepository, times(1)).save(any(Customer.class));
+        assertThat(result.getName()).isEqualTo(customer.getName());
+        assertThat(result.getCpf()).isEqualTo(customer.getCpf());
+
+        verify(customerRepository).findByCpf(customerRequest.cpf());
+        verify(customerRepository).save(any(Customer.class));
     }
 
     @Test
-    @DisplayName("should find customer by ID success")
+    @DisplayName("Should find customer by ID successfully")
     void shouldFindCustomerByIdSuccessfully() {
         when(customerRepository.findById(customer.getCustomerId())).thenReturn(Optional.of(customer));
 
@@ -86,15 +92,24 @@ class CustomerServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getCustomerId()).isEqualTo(customer.getCustomerId());
-        verify(customerRepository, times(1)).findById(customer.getCustomerId());
+        assertThat(result.getName()).isEqualTo(customer.getName());
+        assertThat(result.getCpf()).isEqualTo(customer.getCpf());
+
+        verify(customerRepository).findById(customer.getCustomerId());
     }
 
     @Test
-    @DisplayName("should throw CustomerNotFoundException when customer by ID not found")
-    void shouldThrowExceptionWhenCustomerByIdNotFound() {
-        when(customerRepository.findById(2L)).thenReturn(Optional.empty());
+    @DisplayName("Should throw CustomerNotFoundException when customer not found by ID")
+    void shouldThrowExceptionWhenCustomerNotFound() {
+        Long nonExistentId = 999L;
+        when(customerRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        assertThrows(CustomerNotFoundException.class, () -> customerService.findById(2L));
-        verify(customerRepository, times(1)).findById(2L);
+        CustomerNotFoundException exception = assertThrows(CustomerNotFoundException.class,
+                () -> customerService.findById(nonExistentId));
+
+        assertThat(exception.getMessage()).contains(String.valueOf(nonExistentId));
+        verify(customerRepository).findById(nonExistentId);
     }
+
+
 }

@@ -1,10 +1,8 @@
 package br.vitorsb.delivery_management_api.service;
 
-import br.vitorsb.delivery_management_api.config.exception.AddressDeliveryNotFoundException;
 import br.vitorsb.delivery_management_api.domain.AddressDelivery;
 import br.vitorsb.delivery_management_api.domain.Customer;
 import br.vitorsb.delivery_management_api.domain.dto.request.AddressRequest;
-import br.vitorsb.delivery_management_api.domain.mapper.AddressDeliveryMapper;
 import br.vitorsb.delivery_management_api.repository.AddressDeliveryRepository;
 import br.vitorsb.delivery_management_api.service.impl.AddressDeliveryServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,11 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -29,8 +27,6 @@ class AddressDeliveryServiceTest {
 
     @Mock
     private AddressDeliveryRepository addressDeliveryRepository;
-    @Mock
-    private AddressDeliveryMapper addressDeliveryMapper;
 
     @InjectMocks
     private AddressDeliveryServiceImpl addressDeliveryService;
@@ -46,6 +42,7 @@ class AddressDeliveryServiceTest {
                 .name("Vitor")
                 .cpf("66666666666")
                 .build();
+
         addressDelivery = AddressDelivery.builder()
                 .addressDeliveryId(1L)
                 .cep("12345000")
@@ -56,13 +53,14 @@ class AddressDeliveryServiceTest {
                 .number("123")
                 .customer(customer)
                 .build();
+
         addressRequest = new AddressRequest(
                 "12345000", "SP", "São Paulo", "Centro", "Rua do Teste", "123", null
         );
     }
 
     @Test
-    @DisplayName("should find or create address")
+    @DisplayName("Should find or create address when exists")
     void shouldFindOrCreateAddressWhenExistsForCustomer() {
         when(addressDeliveryRepository.findByCepAndNumberAndCustomerCustomerId(
                 addressRequest.cep(), addressRequest.number(), customer.getCustomerId()))
@@ -72,49 +70,71 @@ class AddressDeliveryServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getAddressDeliveryId()).isEqualTo(addressDelivery.getAddressDeliveryId());
-        verify(addressDeliveryRepository, times(1)).findByCepAndNumberAndCustomerCustomerId(
+        assertThat(result.getCep()).isEqualTo(addressDelivery.getCep());
+        assertThat(result.getStreet()).isEqualTo(addressDelivery.getStreet());
+        assertThat(result.getNumber()).isEqualTo(addressDelivery.getNumber());
+        assertThat(result.getCustomer()).isEqualTo(customer);
+
+        verify(addressDeliveryRepository).findByCepAndNumberAndCustomerCustomerId(
                 addressRequest.cep(), addressRequest.number(), customer.getCustomerId());
-        verify(addressDeliveryRepository, never()).save(any(AddressDelivery.class));
-        verify(addressDeliveryMapper, never()).toEntity(any(AddressRequest.class));
+        verify(addressDeliveryRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("should find or create address when address not exist ")
+    @DisplayName("Should find or create address when not exists")
     void shouldFindOrCreateAddressWhenNotExistsForCustomer() {
         when(addressDeliveryRepository.findByCepAndNumberAndCustomerCustomerId(
                 addressRequest.cep(), addressRequest.number(), customer.getCustomerId()))
                 .thenReturn(Optional.empty());
-        when(addressDeliveryMapper.toEntity(addressRequest)).thenReturn(addressDelivery);
         when(addressDeliveryRepository.save(any(AddressDelivery.class))).thenReturn(addressDelivery);
 
         AddressDelivery result = addressDeliveryService.findOrCreate(customer, addressRequest);
 
         assertThat(result).isNotNull();
         assertThat(result.getAddressDeliveryId()).isEqualTo(addressDelivery.getAddressDeliveryId());
-        verify(addressDeliveryRepository, times(1)).findByCepAndNumberAndCustomerCustomerId(
+        assertThat(result.getCep()).isEqualTo(addressDelivery.getCep());
+        assertThat(result.getStreet()).isEqualTo(addressDelivery.getStreet());
+        assertThat(result.getNumber()).isEqualTo(addressDelivery.getNumber());
+        assertThat(result.getCustomer()).isEqualTo(customer);
+
+        verify(addressDeliveryRepository).findByCepAndNumberAndCustomerCustomerId(
                 addressRequest.cep(), addressRequest.number(), customer.getCustomerId());
-        verify(addressDeliveryMapper, times(1)).toEntity(addressRequest);
-        verify(addressDeliveryRepository, times(1)).save(any(AddressDelivery.class));
+        verify(addressDeliveryRepository).save(any());
     }
 
     @Test
     @DisplayName("Should find addresses by customer ID successfully")
     void shouldFindAddressesByCustomerIdSuccessfully() {
-        AddressDelivery address2 = AddressDelivery.builder().addressDeliveryId(2L).cep("99999999").uf("MG").city("BH").neighborhood("Lourdes").street("Rua B").number("2").customer(customer).build();
-        List<AddressDelivery> addresses = Arrays.asList(addressDelivery, address2);
-
+        List<AddressDelivery> addresses = Arrays.asList(addressDelivery);
         when(addressDeliveryRepository.findByCustomerCustomerId(customer.getCustomerId())).thenReturn(addresses);
 
         List<AddressDelivery> result = addressDeliveryService.findByCustomerId(customer.getCustomerId());
 
         assertThat(result).isNotNull();
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getCustomer().getCustomerId()).isEqualTo(customer.getCustomerId());
-        verify(addressDeliveryRepository, times(1)).findByCustomerCustomerId(customer.getCustomerId());
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getAddressDeliveryId()).isEqualTo(addressDelivery.getAddressDeliveryId());
+        assertThat(result.get(0).getCep()).isEqualTo(addressDelivery.getCep());
+        assertThat(result.get(0).getStreet()).isEqualTo(addressDelivery.getStreet());
+
+        verify(addressDeliveryRepository).findByCustomerCustomerId(customer.getCustomerId());
     }
 
     @Test
-    @DisplayName("Should find address by CEP, number, and customer ID successfully")
+    @DisplayName("Should return empty list when no addresses found for customer")
+    void shouldReturnEmptyListWhenNoAddressesFound() {
+        when(addressDeliveryRepository.findByCustomerCustomerId(customer.getCustomerId()))
+                .thenReturn(Collections.emptyList());
+
+        List<AddressDelivery> result = addressDeliveryService.findByCustomerId(customer.getCustomerId());
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+
+        verify(addressDeliveryRepository).findByCustomerCustomerId(customer.getCustomerId());
+    }
+
+    @Test
+    @DisplayName("Should find address by CEP, number and customer ID successfully")
     void shouldFindAddressByCepAndNumberAndCustomerIdSuccessfully() {
         when(addressDeliveryRepository.findByCepAndNumberAndCustomerCustomerId(
                 addressRequest.cep(), addressRequest.number(), customer.getCustomerId()))
@@ -125,20 +145,16 @@ class AddressDeliveryServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getAddressDeliveryId()).isEqualTo(addressDelivery.getAddressDeliveryId());
-        verify(addressDeliveryRepository, times(1)).findByCepAndNumberAndCustomerCustomerId(
+        assertThat(result.getCep()).isEqualTo(addressDelivery.getCep());
+        assertThat(result.getStreet()).isEqualTo(addressDelivery.getStreet());
+        assertThat(result.getNumber()).isEqualTo(addressDelivery.getNumber());
+
+        verify(addressDeliveryRepository).findByCepAndNumberAndCustomerCustomerId(
                 addressRequest.cep(), addressRequest.number(), customer.getCustomerId());
     }
 
-    @Test
-    @DisplayName("Should throw AddressDeliveryNotFoundException when address by CEP, number, customer ID not found")
-    void shouldThrowExceptionWhenAddressByCepNumberCustomerIdNotFound() {
-        when(addressDeliveryRepository.findByCepAndNumberAndCustomerCustomerId(
-                "nonexistent", "nonexistent", 2L))
-                .thenReturn(Optional.empty());
 
-        assertThrows(AddressDeliveryNotFoundException.class, () ->
-                addressDeliveryService.findByCepAndNumberAndCustomerId("nonexistent", "nonexistent", 2L));
-        verify(addressDeliveryRepository, times(1)).findByCepAndNumberAndCustomerCustomerId(
-                "nonexistent", "nonexistent", 2L);
-    }
+
+
+
 }

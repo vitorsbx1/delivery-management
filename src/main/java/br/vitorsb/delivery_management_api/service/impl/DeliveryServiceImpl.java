@@ -24,16 +24,14 @@ public class DeliveryServiceImpl implements DeliveryService {
 
 
     private final DeliveryRepository deliveryRepository;
-    private final DeliveryMapper deliveryMapper;
     private final CustomerService customerService;
     private final AddressDeliveryService addressDeliveryService;
 
 
     public DeliveryServiceImpl(DeliveryRepository deliveryRepository,
-                               DeliveryMapper deliveryMapper,
-                               CustomerService customerService, AddressDeliveryService addressDeliveryService) {
+                               CustomerService customerService,
+                               AddressDeliveryService addressDeliveryService) {
         this.deliveryRepository = deliveryRepository;
-        this.deliveryMapper = deliveryMapper;
         this.customerService = customerService;
         this.addressDeliveryService = addressDeliveryService;
     }
@@ -53,7 +51,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         delivery = deliveryRepository.save(delivery);
 
-        return deliveryMapper.toResponse(delivery);
+        return DeliveryMapper.toResponse(delivery);
 
     }
 
@@ -68,7 +66,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public DeliveryResponse getDeliveryById(Long id) {
         return deliveryRepository.findById(id)
-                .map(deliveryMapper::toResponse)
+                .map(DeliveryMapper::toResponse)
                 .orElseThrow(() -> new DeliveryNotFoundException("Delivery not found with id: " + id));
     }
 
@@ -80,12 +78,12 @@ public class DeliveryServiceImpl implements DeliveryService {
         Customer updatedCustomer = findOrCreate(deliveryRequest.customer());
         AddressDelivery updatedAddress = findOrCreate(updatedCustomer, deliveryRequest.addressDelivery());
 
-        deliveryMapper.updateEntityFromRequest(deliveryRequest, delivery);
+        DeliveryMapper.updateEntityFromRequest(deliveryRequest, delivery);
         delivery.setCustomer(updatedCustomer);
         delivery.setAddressDelivery(updatedAddress);
         deliveryRepository.save(delivery);
 
-        return deliveryMapper.toResponse(delivery);
+        return DeliveryMapper.toResponse(delivery);
     }
 
     @Override

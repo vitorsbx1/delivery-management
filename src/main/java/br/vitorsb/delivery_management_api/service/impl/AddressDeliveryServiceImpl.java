@@ -15,11 +15,9 @@ import java.util.List;
 public class AddressDeliveryServiceImpl implements AddressDeliveryService {
 
     private final AddressDeliveryRepository addressDeliveryRepository;
-    private final AddressDeliveryMapper addressDeliveryMapper;
 
-    public AddressDeliveryServiceImpl(AddressDeliveryRepository addressDeliveryRepository, AddressDeliveryMapper addressDeliveryMapper) {
+    public AddressDeliveryServiceImpl(AddressDeliveryRepository addressDeliveryRepository) {
         this.addressDeliveryRepository = addressDeliveryRepository;
-        this.addressDeliveryMapper = addressDeliveryMapper;
     }
 
 
@@ -31,7 +29,7 @@ public class AddressDeliveryServiceImpl implements AddressDeliveryService {
                         addressRequest.number(),
                         customer.getCustomerId())
                 .orElseGet(() -> {
-                    AddressDelivery addressDelivery = addressDeliveryMapper.toEntity(addressRequest);
+                    AddressDelivery addressDelivery = AddressDeliveryMapper.toEntity(addressRequest);
                     addressDelivery.setCustomer(customer);
                     return addressDeliveryRepository.save(addressDelivery);
                 });

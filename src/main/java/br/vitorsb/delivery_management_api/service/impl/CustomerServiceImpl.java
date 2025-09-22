@@ -17,11 +17,9 @@ import java.util.List;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final CustomerMapper customerMapper;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, CustomerMapper customerMapper) {
+    public CustomerServiceImpl(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
-        this.customerMapper = customerMapper;
     }
 
 
@@ -29,7 +27,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Customer findOrCreate(CustomerRequest customerRequest) {
         return customerRepository.findByCpf(customerRequest.cpf())
                 .orElseGet(() -> {
-                    Customer customer = customerMapper.toEntity(customerRequest);
+                    Customer customer = CustomerMapper.toEntity(customerRequest);
                     return customerRepository.save(customer);
                 });
     }
